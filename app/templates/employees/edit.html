@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Edit Employee{% endblock %}
+{% block page_title %}Edit Employee — {{ emp.full_name }}{% endblock %}
+{% block content %}
+<div class="form-card">
+  <form method="POST">
+    <div class="form-section-title">Basic Information</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+      <div><label>First Name *</label><input name="first_name" value="{{ emp.first_name }}" required></div>
+      <div><label>Last Name *</label><input name="last_name" value="{{ emp.last_name }}" required></div>
+      <div><label>Phone</label><input name="phone" value="{{ emp.phone or '' }}"></div>
+      <div><label>Gender</label>
+        <select name="gender">
+          <option value="">Select</option>
+          <option {% if emp.gender == 'Male' %}selected{% endif %}>Male</option>
+          <option {% if emp.gender == 'Female' %}selected{% endif %}>Female</option>
+          <option {% if emp.gender == 'Other' %}selected{% endif %}>Other</option>
+        </select>
+      </div>
+      <div><label>Status</label>
+        <select name="status">
+          <option value="active" {% if emp.status == 'active' %}selected{% endif %}>Active</option>
+          <option value="inactive" {% if emp.status == 'inactive' %}selected{% endif %}>Inactive</option>
+          <option value="resigned" {% if emp.status == 'resigned' %}selected{% endif %}>Resigned</option>
+        </select>
+      </div>
+      <div><label>Employment Type</label>
+        <select name="employment_type">
+          <option value="full_time" {% if emp.employment_type == 'full_time' %}selected{% endif %}>Full Time</option>
+          <option value="part_time" {% if emp.employment_type == 'part_time' %}selected{% endif %}>Part Time</option>
+          <option value="contract" {% if emp.employment_type == 'contract' %}selected{% endif %}>Contract</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:12px;"><label>Address</label><textarea name="address" rows="2">{{ emp.address or '' }}</textarea></div>
+
+    <div class="form-section-title">Job Details</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div><label>Department</label>
+        <select name="department_id">
+          <option value="">Select Department</option>
+          {% for d in departments %}<option value="{{ d.id }}" {% if emp.department_id == d.id %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div><label>Designation</label>
+        <select name="designation_id">
+          <option value="">Select Designation</option>
+          {% for d in designations %}<option value="{{ d.id }}" {% if emp.designation_id == d.id %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="form-section-title">Salary Structure</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;">
+      <div><label>Basic Salary (₹)</label><input name="basic_salary" type="number" step="0.01" value="{{ emp.basic_salary }}"></div>
+      <div><label>HRA (₹)</label><input name="hra" type="number" step="0.01" value="{{ emp.hra }}"></div>
+      <div><label>Special Allowance (₹)</label><input name="special_allowance" type="number" step="0.01" value="{{ emp.special_allowance }}"></div>
+      <div><label>Travel Allowance (₹)</label><input name="travel_allowance" type="number" step="0.01" value="{{ emp.travel_allowance }}"></div>
+    </div>
+
+    <div class="form-section-title">EPF & ESIC Details</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div><label>UAN Number</label><input name="uan_number" value="{{ emp.uan_number or '' }}"></div>
+      <div><label>ESIC IP Number</label><input name="esic_ip_number" value="{{ emp.esic_ip_number or '' }}"></div>
+      <div><label>PAN Number</label><input name="pan_number" value="{{ emp.pan_number or '' }}"></div>
+    </div>
+
+    <div style="margin-top:24px;display:flex;gap:12px;">
+      <button type="submit" class="btn-primary-custom"><i class="fas fa-save"></i> Update Employee</button>
+      <a href="{{ url_for('employees.view', id=emp.id) }}" class="btn-sm-outline" style="padding:9px 22px;">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Attendance Report{% endblock %}
+{% block page_title %}Attendance Report{% endblock %}
+{% block content %}
+<div class="table-card" style="margin-bottom:16px;">
+  <form method="GET" style="display:flex;gap:12px;align-items:flex-end;">
+    <div>
+      <label>Month</label>
+      <select name="month">
+        {% for m in range(1,13) %}
+        <option value="{{ m }}" {% if m == month %}selected{% endif %}>
+          {{ ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m] }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Year</label>
+      <select name="year">
+        {% for y in range(2023, 2027) %}
+        <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn-primary-custom">View Report</button>
+    <a href="{{ url_for('exports.export_attendance', month=month, year=year) }}"
+       style="background:#27ae60;color:white;padding:9px 18px;border-radius:8px;
+              text-decoration:none;font-size:13px;font-weight:500;display:inline-block;">
+      <i class="fas fa-file-excel"></i> Download Excel
+    </a>
+  </form>
+</div>
+<div class="table-card">
+  <table>
+    <thead>
+      <tr><th>Employee</th><th>Department</th><th>Present</th><th>Absent</th><th>Half Day</th><th>WFH</th><th>Total Days</th></tr>
+    </thead>
+    <tbody>
+      {% for row in report_data %}
+      <tr>
+        <td><b>{{ row.employee.full_name }}</b></td>
+        <td>{{ row.employee.department.name if row.employee.department else '—' }}</td>
+        <td style="color:#27ae60;font-weight:600;">{{ row.present }}</td>
+        <td style="color:#e74c3c;font-weight:600;">{{ row.absent }}</td>
+        <td style="color:#f39c12;">{{ row.half_day }}</td>
+        <td style="color:#2980b9;">{{ row.wfh }}</td>
+        <td>{{ row.total }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" style="text-align:center;color:#aaa;padding:30px;">No attendance data for this period.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

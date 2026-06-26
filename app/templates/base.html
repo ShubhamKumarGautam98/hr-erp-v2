@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}HR ERP System{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --primary: #1a237e; --primary-light: #3949ab; --accent: #00bcd4;
+      --sidebar-width: 250px; --topbar-h: 60px; --body-bg: #f0f2f8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--body-bg); color: #333; }
+    .sidebar {
+      position: fixed; top: 0; left: 0; width: var(--sidebar-width);
+      height: 100vh; background: var(--primary);
+      display: flex; flex-direction: column; z-index: 1000; overflow-y: auto;
+    }
+    .sidebar-brand { padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,0.1);
+      color: white; font-size: 18px; font-weight: 700; }
+    .sidebar-brand span { color: var(--accent); }
+    .role-badge { font-size: 10px; background: rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.8); padding: 2px 8px; border-radius: 10px;
+      margin-top: 4px; display: inline-block; text-transform: uppercase; letter-spacing: 1px; }
+    .sidebar-section { padding: 12px 16px 4px; font-size: 10px; text-transform: uppercase;
+      letter-spacing: 1.5px; color: rgba(255,255,255,0.4); font-weight: 600; }
+    .sidebar-menu { list-style: none; padding: 0; }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 10px; padding: 10px 20px;
+      color: rgba(255,255,255,0.85); text-decoration: none; font-size: 14px;
+      transition: all 0.2s; border-left: 3px solid transparent;
+    }
+    .sidebar-menu li a:hover, .sidebar-menu li a.active {
+      background: rgba(255,255,255,0.1); color: white; border-left-color: var(--accent);
+    }
+    .sidebar-menu li a i { width: 18px; text-align: center; }
+    .topbar {
+      position: fixed; top: 0; left: var(--sidebar-width); right: 0;
+      height: var(--topbar-h); background: white;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); z-index: 999;
+    }
+    .topbar-title { font-size: 16px; font-weight: 600; color: #333; }
+    .topbar-user { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+    .topbar-user .avatar {
+      width: 36px; height: 36px; background: var(--primary-light);
+      border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; color: white; font-weight: 600;
+    }
+    .main-content { margin-left: var(--sidebar-width); margin-top: var(--topbar-h);
+      padding: 24px; min-height: calc(100vh - var(--topbar-h)); }
+    .stat-card { background: white; border-radius: 12px; padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 16px; }
+    .stat-icon { width: 54px; height: 54px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; color: white; flex-shrink: 0; }
+    .stat-val { font-size: 26px; font-weight: 700; color: #222; }
+    .stat-label { font-size: 13px; color: #888; }
+    .table-card { background: white; border-radius: 12px; padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .table-card h5 { font-size: 15px; font-weight: 600; margin-bottom: 16px; color: #333; }
+    table { width: 100%; border-collapse: collapse; }
+    table th { background: #f5f7fc; font-size: 12px; text-transform: uppercase;
+      letter-spacing: 0.5px; color: #666; padding: 10px 14px; }
+    table td { padding: 10px 14px; font-size: 13.5px; border-bottom: 1px solid #f0f0f0; }
+    table tbody tr:last-child td { border-bottom: none; }
+    table tbody tr:hover { background: #f9fbff; }
+    .badge-status { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .badge-pending { background: #fff3e0; color: #e65100; }
+    .badge-approved { background: #e8f5e9; color: #2e7d32; }
+    .badge-rejected { background: #fce4ec; color: #c62828; }
+    .badge-active { background: #e8f5e9; color: #2e7d32; }
+    .badge-inactive { background: #f3f3f3; color: #888; }
+    .badge-new { background: #e3f2fd; color: #1565c0; }
+    .badge-qualified { background: #e8f5e9; color: #2e7d32; }
+    .badge-won { background: #e8f5e9; color: #1b5e20; }
+    .badge-lost { background: #fce4ec; color: #b71c1c; }
+    .badge-prospect { background: #e3f2fd; color: #1565c0; }
+    .badge-proposal { background: #fff8e1; color: #f57f17; }
+    .badge-negotiation { background: #f3e5f5; color: #6a1b9a; }
+    .badge-present { background: #e8f5e9; color: #2e7d32; }
+    .badge-absent { background: #fce4ec; color: #c62828; }
+    .badge-half_day { background: #fff8e1; color: #f57f17; }
+    .badge-wfh { background: #e3f2fd; color: #1565c0; }
+    .form-card { background: white; border-radius: 12px; padding: 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .form-section-title { font-size: 13px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--primary); margin: 20px 0 12px;
+      border-bottom: 2px solid #e8eaf6; padding-bottom: 6px; }
+    label { font-size: 13px; font-weight: 500; color: #555; margin-bottom: 4px; display: block; }
+    input, select, textarea { width: 100%; padding: 9px 12px; border: 1px solid #dde1ee;
+      border-radius: 8px; font-size: 14px; outline: none; transition: border 0.2s; }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary-light); }
+    .btn-primary-custom { background: var(--primary); color: white; border: none;
+      padding: 9px 22px; border-radius: 8px; font-size: 14px; cursor: pointer;
+      font-weight: 500; transition: background 0.2s; }
+    .btn-primary-custom:hover { background: var(--primary-light); }
+    .btn-success-custom { background: #27ae60; color: white; border: none;
+      padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+    .btn-danger-custom { background: #e74c3c; color: white; border: none;
+      padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+    .btn-info-custom { background: #2980b9; color: white; border: none;
+      padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; }
+    .btn-sm-outline { background: transparent; border: 1px solid var(--primary);
+      color: var(--primary); padding: 5px 12px; border-radius: 6px; font-size: 12px;
+      cursor: pointer; text-decoration: none; display: inline-block; }
+    .flash-msg { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+    .flash-success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #27ae60; }
+    .flash-danger  { background: #fce4ec; color: #c62828; border-left: 4px solid #e74c3c; }
+    .flash-warning { background: #fff8e1; color: #f57f17; border-left: 4px solid #ffa000; }
+    .flash-info    { background: #e3f2fd; color: #1565c0; border-left: 4px solid #2196f3; }
+    .kanban-board { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 16px; }
+    .kanban-col { flex: 0 0 220px; background: #f5f7fc; border-radius: 10px; padding: 14px; }
+    .kanban-col-header { font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 12px; }
+    .kanban-card { background: white; border-radius: 8px; padding: 12px;
+      margin-bottom: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); font-size: 13px; }
+    .kanban-card .company { font-weight: 600; }
+    .kanban-card .value { color: #27ae60; font-weight: 600; font-size: 12px; }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+{# ── Role-based sidebar ─────────────────────────────────────────── #}
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    HR<span>&</span>BD ERP
+    <div class="role-badge">{{ current_user.role.replace('_',' ') }}</div>
+  </div>
+
+  {# Always visible #}
+  <div class="sidebar-section">Main</div>
+  <ul class="sidebar-menu">
+    <li><a href="{{ url_for('dashboard.index') }}"
+           class="{{ 'active' if request.endpoint == 'dashboard.index' }}">
+      <i class="fas fa-tachometer-alt"></i> Dashboard
+    </a></li>
+  </ul>
+
+  {# HR section — admin & hr_manager only #}
+  {% if current_user.role in ('admin', 'hr_manager') %}
+  <div class="sidebar-section">HR Module</div>
+  <ul class="sidebar-menu">
+    <li><a href="{{ url_for('employees.index') }}"
+           class="{{ 'active' if 'employees' in request.endpoint }}">
+      <i class="fas fa-users"></i> Employees
+    </a></li>
+    <li><a href="{{ url_for('attendance.index') }}"
+           class="{{ 'active' if request.endpoint == 'attendance.index' }}">
+      <i class="fas fa-calendar-check"></i> Attendance
+    </a></li>
+    <li><a href="{{ url_for('attendance.report') }}"
+           class="{{ 'active' if request.endpoint == 'attendance.report' }}">
+      <i class="fas fa-chart-bar"></i> Attendance Report
+    </a></li>
+    <li><a href="{{ url_for('leave.index') }}"
+           class="{{ 'active' if request.endpoint == 'leave.index' }}">
+      <i class="fas fa-calendar-times"></i> Leave Requests
+    </a></li>
+    <li><a href="{{ url_for('payroll.index') }}"
+           class="{{ 'active' if request.endpoint == 'payroll.index' }}">
+      <i class="fas fa-money-bill-wave"></i> Payroll
+    </a></li>
+    <li><a href="{{ url_for('compliance.index') }}"
+           class="{{ 'active' if 'compliance' in request.endpoint }}">
+      <i class="fas fa-shield-alt"></i> EPF & ESIC
+    </a></li>
+  </ul>
+  {% endif %}
+
+  {# BD section — admin, bd_manager, bd_executive only #}
+  {% if current_user.role in ('admin', 'bd_manager', 'bd_executive') %}
+  <div class="sidebar-section">BD Module</div>
+  <ul class="sidebar-menu">
+    <li><a href="{{ url_for('bd.index') }}"
+           class="{{ 'active' if request.endpoint == 'bd.index' }}">
+      <i class="fas fa-chart-line"></i> BD Dashboard
+    </a></li>
+    <li><a href="{{ url_for('bd.leads') }}"
+           class="{{ 'active' if request.endpoint in ['bd.leads','bd.add_lead'] }}">
+      <i class="fas fa-funnel-dollar"></i> Leads
+    </a></li>
+    <li><a href="{{ url_for('bd.clients') }}"
+           class="{{ 'active' if request.endpoint in ['bd.clients','bd.add_client'] }}">
+      <i class="fas fa-building"></i> Clients
+    </a></li>
+    <li><a href="{{ url_for('bd.pipeline') }}"
+           class="{{ 'active' if 'pipeline' in request.endpoint or 'opportunity' in request.endpoint }}">
+      <i class="fas fa-stream"></i> Pipeline
+    </a></li>
+    <li><a href="{{ url_for('bd.activities') }}"
+           class="{{ 'active' if 'activit' in request.endpoint }}">
+      <i class="fas fa-tasks"></i> Activities
+    </a></li>
+  </ul>
+  {% endif %}
+
+  {# Employee self-service — employee role only #}
+  {% if current_user.role == 'employee' %}
+  <div class="sidebar-section">My Portal</div>
+  <ul class="sidebar-menu">
+    <li><a href="{{ url_for('leave.my_leaves') }}"
+           class="{{ 'active' if request.endpoint == 'leave.my_leaves' }}">
+      <i class="fas fa-calendar-times"></i> My Leaves
+    </a></li>
+    <li><a href="{{ url_for('leave.apply') }}"
+           class="{{ 'active' if request.endpoint == 'leave.apply' }}">
+      <i class="fas fa-paper-plane"></i> Apply Leave
+    </a></li>
+    <li><a href="{{ url_for('attendance.my_attendance') }}"
+           class="{{ 'active' if request.endpoint == 'attendance.my_attendance' }}">
+      <i class="fas fa-calendar-check"></i> My Attendance
+    </a></li>
+    <li><a href="{{ url_for('payroll.my_payslips') }}"
+           class="{{ 'active' if request.endpoint in ['payroll.my_payslips','payroll.payslip'] }}">
+      <i class="fas fa-file-invoice-dollar"></i> My Payslips
+    </a></li>
+  </ul>
+  {% endif %}
+
+  <div style="margin-top:auto;padding:16px;">
+    <a href="{{ url_for('auth.logout') }}"
+       style="color:rgba(255,255,255,0.6);font-size:13px;text-decoration:none;">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </div>
+</nav>
+
+{# ── Topbar ──────────────────────────────────────────────────────── #}
+<div class="topbar">
+  <div class="topbar-title">{% block page_title %}Dashboard{% endblock %}</div>
+  <div class="topbar-user">
+    <div class="avatar">{{ current_user.username[0].upper() }}</div>
+    <div>
+      <div style="font-weight:600;font-size:14px;">{{ current_user.username }}</div>
+      <div style="font-size:11px;color:#888;">
+        {{ current_user.role.replace('_',' ').title() }}
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── Main content ────────────────────────────────────────────────── #}
+<div class="main-content">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash-msg flash-{{ category }}">
+          <i class="fas fa-info-circle"></i> {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

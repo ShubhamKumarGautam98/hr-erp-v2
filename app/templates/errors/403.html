@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Access Denied{% endblock %}
+{% block page_title %}Access Denied{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:center;min-height:60vh;">
+  <div style="text-align:center;max-width:420px;">
+    <div style="font-size:72px;font-weight:800;color:#e8eaf6;line-height:1;">403</div>
+    <div style="font-size:22px;font-weight:700;color:#1a237e;margin-bottom:10px;">
+      Access Denied
+    </div>
+    <div style="color:#888;font-size:14px;margin-bottom:28px;line-height:1.6;">
+      You don't have permission to view this page.<br>
+      Please contact your administrator if you think this is a mistake.
+    </div>
+    <a href="{{ url_for('dashboard.index') }}"
+       style="background:#1a237e;color:white;padding:10px 28px;border-radius:8px;
+              text-decoration:none;font-size:14px;font-weight:500;">
+      ← Go to Dashboard
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Add Opportunity{% endblock %}
+{% block page_title %}Add New Opportunity{% endblock %}
+{% block content %}
+<div class="form-card" style="max-width:700px;">
+  <form method="POST">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div style="grid-column:1/-1;"><label>Opportunity Title *</label><input name="title" required placeholder="e.g. ERP Implementation for ABC Corp"></div>
+      <div><label>Client</label>
+        <select name="client_id">
+          <option value="">Select Client</option>
+          {% for c in clients %}<option value="{{ c.id }}">{{ c.company_name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div><label>Lead (if converted)</label>
+        <select name="lead_id">
+          <option value="">Select Lead</option>
+          {% for l in leads %}<option value="{{ l.id }}">{{ l.company_name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div><label>Stage</label>
+        <select name="stage">
+          <option value="prospect">Prospect</option><option value="proposal">Proposal</option>
+          <option value="negotiation">Negotiation</option><option value="won">Won</option><option value="lost">Lost</option>
+        </select>
+      </div>
+      <div><label>Deal Value (₹)</label><input name="value" type="number" step="0.01" placeholder="0.00"></div>
+      <div><label>Expected Close Date</label><input name="expected_close_date" type="date"></div>
+      <div><label>Probability (%)</label><input name="probability" type="number" min="0" max="100" placeholder="0-100"></div>
+      <div><label>Assign To</label>
+        <select name="assigned_to">
+          <option value="">Not Assigned</option>
+          {% for u in users %}<option value="{{ u.id }}">{{ u.username }}</option>{% endfor %}
+        </select>
+      </div>
+      <div style="grid-column:1/-1;"><label>Description</label><textarea name="description" rows="3"></textarea></div>
+    </div>
+    <div style="margin-top:20px;display:flex;gap:12px;">
+      <button type="submit" class="btn-primary-custom"><i class="fas fa-save"></i> Save Opportunity</button>
+      <a href="{{ url_for('bd.pipeline') }}" class="btn-sm-outline" style="padding:9px 22px;">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

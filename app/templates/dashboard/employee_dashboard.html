@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard{% endblock %}
+{% block page_title %}My Dashboard{% endblock %}
+{% block content %}
+<div style="max-width:700px;">
+  <div style="background:linear-gradient(135deg,#1a237e,#3949ab);border-radius:16px;
+              padding:28px;color:white;margin-bottom:24px;">
+    <div style="font-size:22px;font-weight:700;margin-bottom:4px;">
+      Welcome, {{ user.username.title() }} 👋
+    </div>
+    <div style="opacity:0.8;font-size:14px;">Employee Self-Service Portal</div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+    <a href="{{ url_for('leave.my_leaves') }}" style="text-decoration:none;">
+      <div class="stat-card" style="cursor:pointer;transition:box-shadow 0.2s;"
+           onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.12)'"
+           onmouseout="this.style.boxShadow=''">
+        <div class="stat-icon" style="background:#e67e22;">
+          <i class="fas fa-calendar-times"></i>
+        </div>
+        <div>
+          <div class="stat-val">Leaves</div>
+          <div class="stat-label">View my leave history</div>
+        </div>
+      </div>
+    </a>
+
+    <a href="{{ url_for('leave.apply') }}" style="text-decoration:none;">
+      <div class="stat-card" style="cursor:pointer;transition:box-shadow 0.2s;"
+           onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.12)'"
+           onmouseout="this.style.boxShadow=''">
+        <div class="stat-icon" style="background:#27ae60;">
+          <i class="fas fa-paper-plane"></i>
+        </div>
+        <div>
+          <div class="stat-val">Apply</div>
+          <div class="stat-label">Apply for leave</div>
+        </div>
+      </div>
+    </a>
+
+    <a href="{{ url_for('attendance.my_attendance') }}" style="text-decoration:none;">
+      <div class="stat-card" style="cursor:pointer;transition:box-shadow 0.2s;"
+           onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.12)'"
+           onmouseout="this.style.boxShadow=''">
+        <div class="stat-icon" style="background:#2980b9;">
+          <i class="fas fa-calendar-check"></i>
+        </div>
+        <div>
+          <div class="stat-val">Attendance</div>
+          <div class="stat-label">View my attendance</div>
+        </div>
+      </div>
+    </a>
+
+    <a href="{{ url_for('payroll.my_payslips') }}" style="text-decoration:none;">
+      <div class="stat-card" style="cursor:pointer;transition:box-shadow 0.2s;"
+           onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.12)'"
+           onmouseout="this.style.boxShadow=''">
+        <div class="stat-icon" style="background:#8e44ad;">
+          <i class="fas fa-file-invoice-dollar"></i>
+        </div>
+        <div>
+          <div class="stat-val">Payslips</div>
+          <div class="stat-label">Download my payslips</div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+{% endblock %}

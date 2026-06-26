@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}My Leaves{% endblock %}
+{% block page_title %}My Leave History{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+  <div></div>
+  <a href="{{ url_for('leave.apply') }}" class="btn-primary-custom" style="text-decoration:none;">
+    <i class="fas fa-plus"></i> Apply Leave
+  </a>
+</div>
+<div class="table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Leave Type</th><th>From</th><th>To</th><th>Days</th>
+        <th>Reason</th><th>Status</th><th>Applied On</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for l in leaves %}
+      <tr>
+        <td>{{ l.leave_type.name }}</td>
+        <td>{{ l.from_date.strftime('%d %b %Y') }}</td>
+        <td>{{ l.to_date.strftime('%d %b %Y') }}</td>
+        <td>{{ l.days }}</td>
+        <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          {{ l.reason or '—' }}
+        </td>
+        <td>
+          <span class="badge-status badge-{{ l.status }}">
+            {{ l.status.title() }}
+          </span>
+        </td>
+        <td style="font-size:12px;color:#888;">
+          {{ l.applied_on.strftime('%d %b %Y') }}
+        </td>
+        <td>
+          {# Employee can cancel only their own PENDING leaves #}
+          {% if l.status == 'pending' %}
+            <form method="POST" action="{{ url_for('leave.cancel', id=l.id) }}"
+                  onsubmit="return confirm('Cancel this leave request?')">
+              <button type="submit"
+                      style="background:#ef5350;color:white;border:none;
+                             padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;">
+                Cancel
+              </button>
+            </form>
+          {% else %}
+            <span style="color:#ccc;font-size:12px;">—</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="8" style="text-align:center;color:#aaa;padding:30px;">
+          No leave requests found.
+          <a href="{{ url_for('leave.apply') }}">Apply now</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<style>.badge-voided { background:#eceff1;color:#546e7a; }</style>
+{% endblock %}

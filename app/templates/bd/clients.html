@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Clients{% endblock %}
+{% block page_title %}Client Management{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+  <div style="font-size:13px;color:#888;">{{ clients|length }} clients</div>
+  <a href="{{ url_for('bd.add_client') }}" class="btn-primary-custom" style="text-decoration:none;"><i class="fas fa-plus"></i> Add Client</a>
+</div>
+<div class="table-card">
+  <table>
+    <thead><tr><th>Company</th><th>Industry</th><th>Primary Contact</th><th>Opportunities</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for c in clients %}
+      <tr>
+        <td>
+          <b>{{ c.company_name }}</b><br>
+          <span style="font-size:11px;color:#888;">{{ c.website or '' }}</span>
+        </td>
+        <td>{{ c.industry or '—' }}</td>
+        <td>
+          {% set primary = c.contacts | selectattr('is_primary') | first %}
+          {% if primary %}
+            {{ primary.name }}<br>
+            <span style="font-size:11px;color:#888;">{{ primary.email or '' }}</span>
+          {% else %}—{% endif %}
+        </td>
+        <td>{{ c.opportunities | length }}</td>
+        <td><span class="badge-status badge-{{ c.status }}">{{ c.status.title() }}</span></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" style="text-align:center;color:#aaa;padding:30px;">No clients yet. <a href="{{ url_for('bd.add_client') }}">Add one</a></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

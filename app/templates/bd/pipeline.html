@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Sales Pipeline{% endblock %}
+{% block page_title %}Sales Pipeline{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+  <div style="font-size:13px;color:#888;">Drag-and-drop pipeline view</div>
+  <div style="display:flex;gap:8px;">
+    <a href="{{ url_for('exports.export_pipeline') }}"
+       style="background:#27ae60;color:white;padding:9px 18px;border-radius:8px;
+              text-decoration:none;font-size:13px;font-weight:500;">
+      <i class="fas fa-file-excel"></i> Download Excel
+    </a>
+    <a href="{{ url_for('bd.add_opportunity') }}" class="btn-primary-custom" style="text-decoration:none;"><i class="fas fa-plus"></i> Add Opportunity</a>
+  </div>
+</div>
+
+<div class="kanban-board">
+  {% set stage_colors = {'prospect':'#2980b9','proposal':'#f39c12','negotiation':'#8e44ad','won':'#27ae60','lost':'#e74c3c'} %}
+  {% for stage in stages %}
+  <div class="kanban-col">
+    <div class="kanban-col-header" style="color:{{ stage_colors[stage] }};">
+      {{ stage.title() }}
+      <span style="background:{{ stage_colors[stage] }};color:white;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px;">{{ pipeline_data[stage]|length }}</span>
+    </div>
+    {% for opp in pipeline_data[stage] %}
+    <div class="kanban-card">
+      <div class="company">{{ opp.title|truncate(30) }}</div>
+      {% if opp.client %}<div style="font-size:11px;color:#888;">{{ opp.client.company_name }}</div>{% endif %}
+      <div class="value" style="margin-top:4px;">₹{{ '{:,.0f}'.format(opp.value) }}</div>
+      {% if opp.expected_close_date %}
+      <div style="font-size:11px;color:#aaa;margin-top:2px;">Close: {{ opp.expected_close_date.strftime('%d %b %Y') }}</div>
+      {% endif %}
+      <div style="margin-top:8px;">
+        <form method="POST" action="{{ url_for('bd.move_opportunity', id=opp.id) }}" style="display:flex;gap:4px;">
+          <select name="stage" style="font-size:11px;padding:3px;border-radius:4px;flex:1;">
+            {% for s in stages %}
+            <option value="{{ s }}" {% if opp.stage == s %}selected{% endif %}>→ {{ s.title() }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="btn-success-custom" style="padding:3px 6px;font-size:11px;">✓</button>
+        </form>
+      </div>
+    </div>
+    {% else %}
+    <div style="color:#ccc;font-size:12px;text-align:center;padding:16px;">Empty</div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

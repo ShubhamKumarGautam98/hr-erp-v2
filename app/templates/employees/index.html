@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Employees{% endblock %}
+{% block page_title %}Employee Management{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+  <div>
+    <div style="font-size:13px;color:#888;">{{ employees|length }} employees found</div>
+  </div>
+  <a href="{{ url_for('employees.add') }}" class="btn-primary-custom" style="text-decoration:none;display:inline-block;">
+    <i class="fas fa-plus"></i> Add Employee
+  </a>
+  </div>
+</div>
+
+<div class="table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Code</th><th>Name</th><th>Department</th><th>Designation</th>
+        <th>Basic Salary</th><th>EPF</th><th>ESIC</th><th>Status</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for emp in employees %}
+      <tr>
+        <td><b>{{ emp.employee_code }}</b></td>
+        <td>{{ emp.full_name }}</td>
+        <td>{{ emp.department.name if emp.department else '—' }}</td>
+        <td>{{ emp.designation.name if emp.designation else '—' }}</td>
+        <td>₹{{ '{:,.0f}'.format(emp.basic_salary) }}</td>
+        <td>
+          {% if emp.epf_applicable %}
+            <span class="badge-status badge-approved">✓ Applicable</span>
+          {% else %}
+            <span class="badge-status badge-inactive">Not Applicable</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if emp.esic_applicable %}
+            <span class="badge-status badge-approved">✓ Applicable</span>
+          {% else %}
+            <span class="badge-status badge-inactive">Not Applicable</span>
+          {% endif %}
+        </td>
+        <td><span class="badge-status badge-{{ emp.status }}">{{ emp.status.title() }}</span></td>
+        <td>
+          <a href="{{ url_for('employees.view', id=emp.id) }}" class="btn-sm-outline">View</a>
+          <a href="{{ url_for('employees.edit', id=emp.id) }}" class="btn-sm-outline" style="margin-left:4px;">Edit</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9" style="text-align:center;color:#aaa;padding:30px;">No employees found. <a href="{{ url_for('employees.add') }}">Add one now</a></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

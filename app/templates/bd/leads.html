@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Leads{% endblock %}
+{% block page_title %}Lead Management{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+  <div style="font-size:13px;color:#888;">{{ leads|length }} total leads</div>
+  <a href="{{ url_for('bd.add_lead') }}" class="btn-primary-custom" style="text-decoration:none;"><i class="fas fa-plus"></i> Add Lead</a>
+</div>
+<div class="table-card">
+  <table>
+    <thead><tr><th>Company</th><th>Contact</th><th>Phone</th><th>Source</th><th>Industry</th><th>Assigned To</th><th>Follow Up</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+      {% for l in leads %}
+      <tr>
+        <td><b>{{ l.company_name }}</b></td>
+        <td>{{ l.contact_name or '—' }}<br><span style="font-size:11px;color:#888;">{{ l.email or '' }}</span></td>
+        <td>{{ l.phone or '—' }}</td>
+        <td>{{ l.source or '—' }}</td>
+        <td>{{ l.industry or '—' }}</td>
+        <td>{{ l.assigned_user.username if l.assigned_user else '—' }}</td>
+        <td>{{ l.next_followup.strftime('%d %b') if l.next_followup else '—' }}</td>
+        <td><span class="badge-status badge-{{ l.status }}">{{ l.status.title() }}</span></td>
+        <td>
+          <form method="POST" action="{{ url_for('bd.update_lead_status', id=l.id) }}" style="display:flex;gap:4px;">
+            <select name="status" style="font-size:11px;padding:3px;border-radius:4px;">
+              {% for s in ['new','contacted','qualified','unqualified','converted','lost'] %}
+              <option value="{{ s }}" {% if l.status == s %}selected{% endif %}>{{ s.title() }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn-success-custom" style="padding:3px 8px;font-size:11px;">✓</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9" style="text-align:center;color:#aaa;padding:30px;">No leads found. <a href="{{ url_for('bd.add_lead') }}">Add one</a></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

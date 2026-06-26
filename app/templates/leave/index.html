@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Leave Management{% endblock %}
+{% block page_title %}Leave Management{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+  <div></div>
+  <a href="{{ url_for('exports.export_leave') }}"
+     style="background:#27ae60;color:white;padding:9px 18px;border-radius:8px;
+            text-decoration:none;font-size:13px;font-weight:500;margin-right:8px;">
+    <i class="fas fa-file-excel"></i> Download Excel
+  </a>
+  <a href="{{ url_for('leave.apply') }}" class="btn-primary-custom" style="text-decoration:none;">
+    <i class="fas fa-plus"></i> Apply Leave
+  </a>
+</div>
+<div class="table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Employee</th><th>Leave Type</th><th>From</th><th>To</th>
+        <th>Days</th><th>Reason</th><th>Status</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for l in leaves %}
+      <tr>
+        <td><b>{{ l.employee.full_name }}</b></td>
+        <td>{{ l.leave_type.name }}</td>
+        <td>{{ l.from_date.strftime('%d %b %Y') }}</td>
+        <td>{{ l.to_date.strftime('%d %b %Y') }}</td>
+        <td>{{ l.days }}</td>
+        <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          {{ l.reason or '—' }}
+        </td>
+        <td>
+          <span class="badge-status badge-{{ l.status }}">
+            {{ l.status.title() }}
+          </span>
+          {% if l.remarks %}
+          <div style="font-size:10px;color:#aaa;margin-top:2px;">{{ l.remarks }}</div>
+          {% endif %}
+        </td>
+        <td>
+          {# Approve / Reject — only for pending #}
+          {% if l.status == 'pending' %}
+            <form method="POST" action="{{ url_for('leave.approve', id=l.id) }}"
+                  style="display:inline;">
+              <button type="submit" class="btn-success-custom">Approve</button>
+            </form>
+            <form method="POST" action="{{ url_for('leave.reject', id=l.id) }}"
+                  style="display:inline;margin-left:4px;">
+              <button type="submit" class="btn-danger-custom">Reject</button>
+            </form>
+          {% endif %}
+
+          {# Void — available for pending & approved (not already voided) #}
+          {% if l.status in ('pending', 'approved') %}
+            <form method="POST" action="{{ url_for('leave.void', id=l.id) }}"
+                  style="display:inline;margin-left:4px;"
+                  onsubmit="return confirm('Are you sure you want to void this leave?')">
+              <input type="hidden" name="remarks" value="Voided by HR">
+              <button type="submit"
+                      style="background:#78909c;color:white;border:none;
+                             padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;">
+                Void
+              </button>
+            </form>
+          {% endif %}
+
+          {# Nothing to show for already voided/rejected #}
+          {% if l.status in ('voided', 'rejected') %}
+            <span style="color:#ccc;font-size:12px;">—</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="8" style="text-align:center;color:#aaa;padding:30px;">
+          No leave requests found.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{# Add voided badge style if not already in base #}
+<style>
+  .badge-voided { background:#eceff1;color:#546e7a; }
+</style>
+{% endblock %}

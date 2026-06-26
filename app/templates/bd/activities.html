@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Activities{% endblock %}
+{% block page_title %}Activity Tracker{% endblock %}
+{% block content %}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+  <div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h5 style="margin:0;">All Activities</h5>
+    </div>
+    <div class="table-card">
+      <table>
+        <thead><tr><th>Type</th><th>Subject</th><th>Assigned</th><th>Scheduled</th><th>Done?</th></tr></thead>
+        <tbody>
+          {% for a in activities %}
+          <tr>
+            <td>
+              {% if a.type == 'call' %}📞{% elif a.type == 'meeting' %}🤝{% elif a.type == 'email' %}✉️{% elif a.type == 'demo' %}💻{% else %}📋{% endif %}
+              {{ a.type.title() }}
+            </td>
+            <td><b>{{ a.subject|truncate(30) }}</b></td>
+            <td>{{ a.assigned_user.username if a.assigned_user else '—' }}</td>
+            <td style="font-size:12px;">{{ a.scheduled_at.strftime('%d %b, %I:%M %p') if a.scheduled_at else '—' }}</td>
+            <td>
+              {% if a.completed %}
+                <span style="color:#27ae60;">✓ Done</span>
+              {% else %}
+                <form method="POST" action="{{ url_for('bd.complete_activity', id=a.id) }}" style="display:inline;">
+                  <button type="submit" class="btn-success-custom" style="padding:3px 8px;font-size:11px;">Mark Done</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" style="text-align:center;color:#aaa;padding:20px;">No activities yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="form-card">
+    <h5 style="margin-bottom:16px;">Schedule New Activity</h5>
+    <form method="POST" action="{{ url_for('bd.add_activity') }}">
+      <div style="display:grid;gap:12px;">
+        <div><label>Activity Type</label>
+          <select name="type">
+            <option value="call">📞 Call</option><option value="meeting">🤝 Meeting</option>
+            <option value="email">✉️ Email</option><option value="demo">💻 Demo</option><option value="followup">📋 Follow Up</option>
+          </select>
+        </div>
+        <div><label>Subject *</label><input name="subject" required placeholder="e.g. Discovery call with ABC"></div>
+        <div><label>Related Lead</label>
+          <select name="lead_id">
+            <option value="">Not Related</option>
+            {% for l in leads %}<option value="{{ l.id }}">{{ l.company_name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div><label>Related Client</label>
+          <select name="client_id">
+            <option value="">Not Related</option>
+            {% for c in clients %}<option value="{{ c.id }}">{{ c.company_name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div><label>Assign To</label>
+          <select name="assigned_to">
+            <option value="">Not Assigned</option>
+            {% for u in users %}<option value="{{ u.id }}">{{ u.username }}</option>{% endfor %}
+          </select>
+        </div>
+        <div><label>Scheduled At</label><input name="scheduled_at" type="datetime-local"></div>
+        <div><label>Notes</label><textarea name="notes" rows="2"></textarea></div>
+        <button type="submit" class="btn-primary-custom"><i class="fas fa-calendar-plus"></i> Schedule Activity</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

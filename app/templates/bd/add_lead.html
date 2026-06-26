@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Add Lead{% endblock %}
+{% block page_title %}Add New Lead{% endblock %}
+{% block content %}
+<div class="form-card" style="max-width:700px;">
+  <form method="POST">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div style="grid-column:1/-1;"><label>Company Name *</label><input name="company_name" required placeholder="Company / Organization name"></div>
+      <div><label>Contact Person</label><input name="contact_name" placeholder="Primary contact name"></div>
+      <div><label>Email</label><input name="email" type="email" placeholder="contact@company.com"></div>
+      <div><label>Phone</label><input name="phone" placeholder="10-digit mobile"></div>
+      <div><label>Lead Source</label>
+        <select name="source">
+          <option value="">Select Source</option>
+          <option>Website</option><option>Referral</option><option>Cold Call</option>
+          <option>LinkedIn</option><option>Exhibition</option><option>Email Campaign</option>
+        </select>
+      </div>
+      <div><label>Industry</label>
+        <select name="industry">
+          <option value="">Select Industry</option>
+          <option>IT / Technology</option><option>Manufacturing</option><option>Healthcare</option>
+          <option>Finance</option><option>Retail</option><option>Education</option><option>Real Estate</option><option>Other</option>
+        </select>
+      </div>
+      <div><label>Assign To</label>
+        <select name="assigned_to">
+          <option value="">Not Assigned</option>
+          {% for u in users %}<option value="{{ u.id }}">{{ u.username }}</option>{% endfor %}
+        </select>
+      </div>
+      <div><label>Next Follow Up</label><input name="next_followup" type="date"></div>
+      <div style="grid-column:1/-1;"><label>Notes</label><textarea name="notes" rows="3" placeholder="Additional notes..."></textarea></div>
+    </div>
+    <div style="margin-top:20px;display:flex;gap:12px;">
+      <button type="submit" class="btn-primary-custom"><i class="fas fa-save"></i> Save Lead</button>
+      <a href="{{ url_for('bd.leads') }}" class="btn-sm-outline" style="padding:9px 22px;">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

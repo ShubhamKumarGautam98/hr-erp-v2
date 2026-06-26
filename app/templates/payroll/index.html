@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Payroll{% endblock %}
+{% block page_title %}Payroll Management{% endblock %}
+{% block content %}
+<div class="table-card" style="margin-bottom:16px;">
+  <form method="GET" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+    <div>
+      <label>Month</label>
+      <select name="month">
+        {% for m in range(1,13) %}
+        <option value="{{ m }}" {% if m == month %}selected{% endif %}>
+          {{ ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m] }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Year</label>
+      <select name="year">
+        {% for y in range(2023, 2027) %}
+        <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn-primary-custom">View</button>
+  </form>
+</div>
+
+{% if not payrolls %}
+<div class="table-card" style="margin-bottom:16px;background:#fff8e1;border-left:4px solid #ffa000;">
+  <p style="color:#555;font-size:14px;"><i class="fas fa-info-circle" style="color:#ffa000;"></i>
+    No payroll generated for this month yet.
+  </p>
+  <form method="POST" action="{{ url_for('payroll.generate') }}" style="margin-top:12px;">
+    <input type="hidden" name="month" value="{{ month }}">
+    <input type="hidden" name="year" value="{{ year }}">
+    <button type="submit" class="btn-primary-custom"><i class="fas fa-cogs"></i> Generate Payroll for All Employees</button>
+  </form>
+</div>
+{% else %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+  <form method="POST" action="{{ url_for('payroll.generate') }}">
+    <input type="hidden" name="month" value="{{ month }}">
+    <input type="hidden" name="year" value="{{ year }}">
+    <button type="submit" class="btn-sm-outline"><i class="fas fa-sync"></i> Re-generate for New Employees</button>
+  </form>
+  <a href="{{ url_for('exports.export_payroll', month=month, year=year) }}"
+     style="background:#27ae60;color:white;padding:9px 18px;border-radius:8px;
+            text-decoration:none;font-size:13px;font-weight:500;">
+    <i class="fas fa-file-excel"></i> Download Excel
+  </a>
+</div>
+<div style="display:none;">
+  <form method="POST" action="{{ url_for('payroll.generate') }}">
+    <input type="hidden" name="month" value="{{ month }}">
+    <input type="hidden" name="year" value="{{ year }}">
+    <button type="submit" class="btn-sm-outline"><i class="fas fa-sync"></i> Re-generate for New Employees</button>
+  </form>
+</div>
+{% endif %}
+
+<div class="table-card">
+  <table>
+    <thead>
+      <tr><th>Employee</th><th>Gross Salary</th><th>EPF (EE)</th><th>ESIC (EE)</th><th>Prof Tax</th><th>Deductions</th><th>Net Pay</th><th>Status</th><th>Payslip</th></tr>
+    </thead>
+    <tbody>
+      {% for p in payrolls %}
+      <tr>
+        <td><b>{{ p.employee.full_name }}</b><br><span style="font-size:11px;color:#888;">{{ p.employee.employee_code }}</span></td>
+        <td>₹{{ '{:,.0f}'.format(p.gross_salary) }}</td>
+        <td>₹{{ '{:,.0f}'.format(p.epf_employee) }}</td>
+        <td>₹{{ '{:,.0f}'.format(p.esic_employee) }}</td>
+        <td>₹{{ '{:,.0f}'.format(p.professional_tax) }}</td>
+        <td style="color:#e74c3c;">₹{{ '{:,.0f}'.format(p.total_deductions) }}</td>
+        <td style="color:#27ae60;font-weight:700;">₹{{ '{:,.0f}'.format(p.net_pay) }}</td>
+        <td><span class="badge-status badge-approved">{{ p.status.title() }}</span></td>
+        <td>
+          <a href="{{ url_for('payroll.payslip', id=p.id) }}" class="btn-sm-outline">View</a>
+          <a href="{{ url_for('payroll.payslip_pdf', id=p.id) }}" class="btn-info-custom" style="text-decoration:none;display:inline-block;margin-left:4px;">PDF</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9" style="text-align:center;color:#aaa;padding:30px;">No payroll records found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

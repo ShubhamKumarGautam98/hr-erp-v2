@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Add Client{% endblock %}
+{% block page_title %}Add New Client{% endblock %}
+{% block content %}
+<div class="form-card" style="max-width:700px;">
+  <form method="POST">
+    <div class="form-section-title">Company Details</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div style="grid-column:1/-1;"><label>Company Name *</label><input name="company_name" required></div>
+      <div><label>Industry</label>
+        <select name="industry">
+          <option value="">Select Industry</option>
+          <option>IT / Technology</option><option>Manufacturing</option><option>Healthcare</option>
+          <option>Finance</option><option>Retail</option><option>Education</option><option>Real Estate</option><option>Other</option>
+        </select>
+      </div>
+      <div><label>Website</label><input name="website" placeholder="https://..."></div>
+      <div style="grid-column:1/-1;"><label>Address</label><textarea name="address" rows="2"></textarea></div>
+    </div>
+    <div class="form-section-title">Primary Contact</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div><label>Contact Name *</label><input name="contact_name" required></div>
+      <div><label>Designation</label><input name="contact_designation" placeholder="e.g. HR Manager"></div>
+      <div><label>Email</label><input name="contact_email" type="email"></div>
+      <div><label>Phone</label><input name="contact_phone"></div>
+    </div>
+    <div style="margin-top:20px;display:flex;gap:12px;">
+      <button type="submit" class="btn-primary-custom"><i class="fas fa-save"></i> Save Client</button>
+      <a href="{{ url_for('bd.clients') }}" class="btn-sm-outline" style="padding:9px 22px;">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

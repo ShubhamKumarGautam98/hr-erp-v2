@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Apply Leave{% endblock %}
+{% block page_title %}Apply for Leave{% endblock %}
+{% block content %}
+<div class="form-card" style="max-width:600px;">
+  <form method="POST">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+      {# ── Employee field ── #}
+      <div style="grid-column:1/-1;">
+        {% if is_employee %}
+          {# Employee sees their own name — no dropdown, just a hidden field #}
+          {% if employees %}
+            <label>Applying As</label>
+            <input type="text" value="{{ employees[0].full_name }} ({{ employees[0].employee_code }})"
+                   disabled style="background:#f5f7fc;color:#555;">
+            <input type="hidden" name="employee_id" value="{{ employees[0].id }}">
+          {% else %}
+            <div style="background:#fce4ec;color:#c62828;padding:12px;border-radius:8px;font-size:13px;">
+              <i class="fas fa-exclamation-circle"></i>
+              Your account is not linked to an employee record. Please contact HR.
+            </div>
+          {% endif %}
+        {% else %}
+          {# HR / Admin sees full dropdown #}
+          <label>Employee *</label>
+          <select name="employee_id" required>
+            <option value="">Select Employee</option>
+            {% for e in employees %}
+              <option value="{{ e.id }}">{{ e.full_name }} ({{ e.employee_code }})</option>
+            {% endfor %}
+          </select>
+        {% endif %}
+      </div>
+
+      {# ── Leave type ── #}
+      <div style="grid-column:1/-1;">
+        <label>Leave Type *</label>
+        <select name="leave_type_id" required>
+          <option value="">Select Leave Type</option>
+          {% for lt in leave_types %}
+            <option value="{{ lt.id }}">{{ lt.name }} ({{ lt.days_allowed }} days/year)</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div><label>From Date *</label><input name="from_date" type="date" required></div>
+      <div><label>To Date *</label><input name="to_date" type="date" required></div>
+
+      <div style="grid-column:1/-1;">
+        <label>Reason</label>
+        <textarea name="reason" rows="3" placeholder="Reason for leave..."></textarea>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;display:flex;gap:12px;">
+      {% if employees %}
+        <button type="submit" class="btn-primary-custom">
+          <i class="fas fa-paper-plane"></i> Submit Request
+        </button>
+      {% endif %}
+
+      {# Cancel goes to the right page depending on role #}
+      {% if is_employee %}
+        <a href="{{ url_for('leave.my_leaves') }}" class="btn-sm-outline" style="padding:9px 22px;">Cancel</a>
+      {% else %}
+        <a href="{{ url_for('leave.index') }}" class="btn-sm-outline" style="padding:9px 22px;">Cancel</a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}EPF & ESIC Compliance{% endblock %}
+{% block page_title %}EPF & ESIC Compliance — {{ month_name }} {{ year }}{% endblock %}
+{% block content %}
+
+<div class="table-card" style="margin-bottom:16px;">
+  <form method="GET" style="display:flex;gap:12px;align-items:flex-end;">
+    <div>
+      <label>Month</label>
+      <select name="month">
+        {% for m in range(1,13) %}
+        <option value="{{ m }}" {% if m == month %}selected{% endif %}>{{ ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m] }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Year</label>
+      <select name="year">{% for y in range(2023,2027) %}<option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>{% endfor %}</select>
+    </div>
+    <button type="submit" class="btn-primary-custom">View</button>
+    {% if epf_records %}
+    <a href="{{ url_for('compliance.epf_ecr', month=month, year=year) }}" class="btn-sm-outline" style="padding:9px 22px;"><i class="fas fa-download"></i> Download EPF ECR</a>
+    <a href="{{ url_for('exports.export_epf', month=month, year=year) }}"
+       style="background:#27ae60;color:white;padding:9px 18px;border-radius:8px;
+              text-decoration:none;font-size:13px;font-weight:500;display:inline-block;">
+      <i class="fas fa-file-excel"></i> EPF Excel
+    </a>
+    <a href="{{ url_for('exports.export_esic', month=month, year=year) }}"
+       style="background:#1565c0;color:white;padding:9px 18px;border-radius:8px;
+              text-decoration:none;font-size:13px;font-weight:500;display:inline-block;">
+      <i class="fas fa-file-excel"></i> ESIC Excel
+    </a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Summary Cards -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;">
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#1a237e;"><i class="fas fa-user-shield"></i></div>
+    <div><div class="stat-val">₹{{ '{:,.0f}'.format(total_epf_employee) }}</div><div class="stat-label">EPF Employee Share</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#27ae60;"><i class="fas fa-building"></i></div>
+    <div><div class="stat-val">₹{{ '{:,.0f}'.format(total_epf_employer) }}</div><div class="stat-label">EPF Employer Share</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#e67e22;"><i class="fas fa-heartbeat"></i></div>
+    <div><div class="stat-val">₹{{ '{:,.0f}'.format(total_esic_employee) }}</div><div class="stat-label">ESIC Employee Share</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon" style="background:#8e44ad;"><i class="fas fa-hospital"></i></div>
+    <div><div class="stat-val">₹{{ '{:,.0f}'.format(total_esic_employer) }}</div><div class="stat-label">ESIC Employer Share</div></div>
+  </div>
+</div>
+
+<!-- Due Date Alert -->
+<div style="background:#fff8e1;border-left:4px solid #ffa000;border-radius:8px;padding:14px 18px;margin-bottom:20px;font-size:13px;">
+  <i class="fas fa-exclamation-triangle" style="color:#ffa000;"></i>
+  <b>Compliance Due Dates:</b>
+  EPF Deposit due by <b>{{ epf_due_date }}</b> &nbsp;|&nbsp;
+  ESIC Deposit due by <b>{{ esic_due_date }}</b> &nbsp;|&nbsp;
+  Total EPF Liability: <b>₹{{ '{:,.0f}'.format(total_epf) }}</b> &nbsp;|&nbsp;
+  Total ESIC Liability: <b>₹{{ '{:,.0f}'.format(total_esic) }}</b>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+  <!-- EPF Table -->
+  <div class="table-card">
+    <h5><i class="fas fa-shield-alt" style="color:#1a237e;"></i> EPF Details</h5>
+    <table>
+      <thead><tr><th>Employee</th><th>UAN</th><th>Basic</th><th>EE (12%)</th><th>ER</th><th>EPS</th></tr></thead>
+      <tbody>
+        {% for r in epf_records %}
+        <tr>
+          <td><b>{{ r.employee.full_name }}</b></td>
+          <td style="font-size:11px;">{{ r.uan_number or '—' }}</td>
+          <td>₹{{ '{:,.0f}'.format(r.basic_wages) }}</td>
+          <td>₹{{ '{:,.0f}'.format(r.epf_employee) }}</td>
+          <td>₹{{ '{:,.0f}'.format(r.epf_employer) }}</td>
+          <td>₹{{ '{:,.0f}'.format(r.eps_employer) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px;">No EPF records. Generate payroll first.</td></tr>
+        {% endfor %}
+        {% if epf_records %}
+        <tr style="background:#e8eaf6;font-weight:700;">
+          <td colspan="3">Total</td>
+          <td>₹{{ '{:,.0f}'.format(total_epf_employee) }}</td>
+          <td>₹{{ '{:,.0f}'.format(total_epf_employer) }}</td>
+          <td>₹{{ '{:,.0f}'.format(total_eps) }}</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ESIC Table -->
+  <div class="table-card">
+    <h5><i class="fas fa-heartbeat" style="color:#e67e22;"></i> ESIC Details</h5>
+    <table>
+      <thead><tr><th>Employee</th><th>IP Number</th><th>Gross</th><th>EE (0.75%)</th><th>ER (3.25%)</th></tr></thead>
+      <tbody>
+        {% for r in esic_records %}
+        <tr>
+          <td><b>{{ r.employee.full_name }}</b></td>
+          <td style="font-size:11px;">{{ r.ip_number or '—' }}</td>
+          <td>₹{{ '{:,.0f}'.format(r.gross_wages) }}</td>
+          <td>₹{{ '{:,.0f}'.format(r.esic_employee) }}</td>
+          <td>₹{{ '{:,.0f}'.format(r.esic_employer) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" style="text-align:center;color:#aaa;padding:20px;">No ESIC records. Generate payroll first.</td></tr>
+        {% endfor %}
+        {% if esic_records %}
+        <tr style="background:#fff3e0;font-weight:700;">
+          <td colspan="3">Total</td>
+          <td>₹{{ '{:,.0f}'.format(total_esic_employee) }}</td>
+          <td>₹{{ '{:,.0f}'.format(total_esic_employer) }}</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Policy Reference -->
+<div class="table-card" style="margin-top:20px;">
+  <h5><i class="fas fa-book" style="color:#1a237e;"></i> EPF & ESIC Policy Reference</h5>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:13px;">
+    <div>
+      <b style="color:#1a237e;">EPF (Employees' Provident Fund)</b>
+      <table style="margin-top:8px;">
+        <tr><td style="color:#888;padding:4px 0;">Applicability</td><td>Basic Salary ≤ ₹15,000/month</td></tr>
+        <tr><td style="color:#888;padding:4px 0;">Employee Contribution</td><td><b>12%</b> of Basic Salary</td></tr>
+        <tr><td style="color:#888;padding:4px 0;">Employer Contribution</td><td><b>12%</b> of Basic Salary</td></tr>
+        <tr><td style="color:#888;padding:4px 0;">EPS (Pension)</td><td><b>8.33%</b> from Employer's 12%</td></tr>
+        <tr><td style="color:#888;padding:4px 0;">EPF Deposit</td><td><b>3.67%</b> from Employer's 12%</td></tr>
+        <tr><td style="color:#888;padding:4px 0;">Due Date</td><td><b>15th</b> of following month</td></tr>
+      </table>
+    </div>
+    <div>
+      <b style="color:#e67e22;">ESIC (Employee State Insurance)</b>
+      <table style="margin-top:8px;">
+        <tr><td style="color:#888;padding:4px 0;">Applicability</td><td>Gross Salary ≤ ₹21,000/month</td></tr>
+        <tr><td style="color:#888;padding:4px 0;">Employee Contribution</td><td><b>0.75%</b> of Gross Salary</td></tr>
+        <tr><td style="color:#888;padding:4px 0;">Employer Contribution</td><td><b>3.25%</b> of Gross Salary</td></tr>
+        <tr><td style="color:#888;padding:4px 0;">Due Date</td><td><b>15th</b> of following month</td></tr>
+        <tr><td style="color:#888;padding:4px 0;">Half-Yearly Return</td><td>Apr–Sep & Oct–Mar</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Attendance{% endblock %}
+{% block page_title %}Attendance — {{ today.strftime('%d %B %Y') }}{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+  <div></div>
+  <a href="{{ url_for('attendance.report') }}" class="btn-sm-outline">
+    <i class="fas fa-chart-bar"></i> Monthly Report
+  </a>
+</div>
+<div class="table-card">
+  <form method="POST" action="{{ url_for('attendance.mark') }}">
+    <table>
+      <thead>
+        <tr><th>#</th><th>Employee</th><th>Department</th><th>Designation</th><th>Attendance</th></tr>
+      </thead>
+      <tbody>
+        {% for emp in employees %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>
+            <input type="hidden" name="employee_id" value="{{ emp.id }}">
+            <b>{{ emp.full_name }}</b><br>
+            <span style="font-size:11px;color:#888;">{{ emp.employee_code }}</span>
+          </td>
+          <td>{{ emp.department.name if emp.department else '—' }}</td>
+          <td>{{ emp.designation.name if emp.designation else '—' }}</td>
+          <td>
+            {% set att = attendance_today.get(emp.id) %}
+            <select name="status_{{ emp.id }}" style="width:140px;padding:6px;">
+              <option value="present" {% if att and att.status == 'present' %}selected{% endif %}>✅ Present</option>
+              <option value="absent" {% if att and att.status == 'absent' %}selected{% elif not att %}selected{% endif %}>❌ Absent</option>
+              <option value="half_day" {% if att and att.status == 'half_day' %}selected{% endif %}>🕐 Half Day</option>
+              <option value="wfh" {% if att and att.status == 'wfh' %}selected{% endif %}>🏠 WFH</option>
+              <option value="on_leave" {% if att and att.status == 'on_leave' %}selected{% endif %}>📅 On Leave</option>
+            </select>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" style="text-align:center;color:#aaa;padding:30px;">No active employees found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if employees %}
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid #eee;">
+      <button type="submit" class="btn-primary-custom"><i class="fas fa-save"></i> Save Attendance</button>
+    </div>
+    {% endif %}
+  </form>
+</div>
+{% endblock %}
